@@ -55,7 +55,7 @@ int main() {
     while (1) {
         // use _CP0_SET_COUNT(0) and _CP0_GET_COUNT() to test the PIC timing
         // remember the core timer runs at half the sysclk
-        if(PORTbits.RB4 == 0){
+        if(PORTBbits.RB4 == 0){
             LATAbits.LATA4 = 1;
             _CP0_SET_COUNT(0);
             while(_CP0_GET_COUNT() < 48000000/2/2){}
