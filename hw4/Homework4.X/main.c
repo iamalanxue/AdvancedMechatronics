@@ -15,7 +15,7 @@
 #pragma config IESO = OFF // disable switching clocks
 #pragma config POSCMOD = HS // high speed crystal mode
 #pragma config OSCIOFNC = OFF // disable clock output
-#pragma config FPBDIV = DIV 1 // divide sysclk freq by 1 for peripheral bus clock
+#pragma config FPBDIV = DIV_1 // divide sysclk freq by 1 for peripheral bus clock
 #pragma config FCKSM = CSDCMD // disable clock switch and FSCM
 #pragma config WDTPS = PS1048576 // use largest wdt
 #pragma config WINDIS = OFF // use non-window mode wdt
@@ -24,7 +24,7 @@
 
 // DEVCFG2 - get the sysclk clock to 48MHz from the 8MHz crystal
 #pragma config FPLLIDIV = DIV_2 // divide input clock to be in range 4-5MHz
-#pragma config FPLLMUL = MUL 24 // multiply clock after FPLLIDIV
+#pragma config FPLLMUL = MUL_24 // multiply clock after FPLLIDIV
 #pragma config FPLLODIV = DIV_2 // divide clock after FPLLMUL to get 48MHz
 
 // DEVCFG3
@@ -49,24 +49,39 @@ int main() {
     DDPCONbits.JTAGEN = 0;
 
     // do your TRIS and LAT commands here
+    TRISAbits.TRISA4 = 0; //A4 as output
+    TRISBbits.TRISB4 = 1; //B4 as input 
+    
+    LATAbits.LATA4 = 0; 
+    LATBbits.LATB4 = 0; //both A4 and B4 turned off 
 
     __builtin_enable_interrupts();
 
     while (1) {
         // use _CP0_SET_COUNT(0) and _CP0_GET_COUNT() to test the PIC timing
         // remember the core timer runs at half the sysclk
-        if(PORTBbits.RB4 == 0){
-            LATAbits.LATA4 = 1;
+        if (PORTBbits.RB4 == 0){
+           
             _CP0_SET_COUNT(0);
-            while(_CP0_GET_COUNT() < 48000000/2/2){}
-            LATAbits.LATA4 = 0;
+            
+            while (_CP0_GET_COUNT() < 48000000/4){
+                LATAbits.LATA4 = 1;
+            }
+            while (_CP0_GET_COUNT() < 48000000/2){
+                LATAbits.LATA4 = 0;
+            }
+            
             _CP0_SET_COUNT(0);
-            while(_CP0_GET_COUNT() < 48000000/2/2){}
-            LATAbits.LATA4 = 1;
-            _CP0_SET_COUNT(0);
-            while(_CP0_GET_COUNT() < 48000000/2/2){}
-            LATAbits.LATA4 = 0;
-            while(_CP0_GET_COUNT() < 48000000/2/2){}
-        }
+            
+            while (_CP0_GET_COUNT() < 48000000/4){
+                LATAbits.LATA4 = 1;
+            }
+            while (_CP0_GET_COUNT() < 48000000/2){
+                LATAbits.LATA4 = 0;
+            }
+            
+         
     }
+   
+}
 }
